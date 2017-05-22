@@ -25,7 +25,7 @@ def getAllProxies():
         exec(declaration)
     found_ips = re.findall(
         r'<font\sclass=spy14>[^A-Z<]+<script\stype=\"text\/javascript\">' +
-        '[^<]+<font\sclass=spy2>:<\\\/font>"\+[a-z\^\d\(\)\+]+',
+        r'[^<]+<font\sclass=spy2>:<\\\/font>"\+[a-z\^\d\(\)\+]+',
         proxy_code
     )
     selected_ips = []
