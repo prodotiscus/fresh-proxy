@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import requests
 import re
 
@@ -28,15 +30,32 @@ def getAllProxies():
         r'[^<]+<font\sclass=spy2>:<\\\/font>"\+[a-z\^\d\(\)\+]+',
         proxy_code
     )
+    found_locations = []
+    for srch in re.finditer(
+        '<font\sclass=spy14>[A-Z]{2}(\s<font\sclass=spy1>[^<]+<\/font>)*',
+        proxy_code
+    ):
+        found_locations.append(srch.group(0))
     selected_ips = []
-    for fi in found_ips:
-        fi_parts = fi.split(
+    for j in range(len(found_ips)):
+        fi_parts = found_ips[j].split(
             '<script type="text/javascript">' +
             'document.write("<font class=spy2>:<\\/font>"+'
         )
+        fi_location = found_locations[j]
+        print(fi_location)
+        ip_object = {
+            'addr' : '',
+            'country' : '',
+            'city' : False
+        }
+        if 'font class=spy1' in fi_location:
+            ip_object['city'] = fi_location[38:-7]
+        ip_object['country'] = fi_location[18:20]
         ip_addr = fi_parts[0][18:]
         ip_port = ''
         for splitted_expr in fi_parts[1][:-1].split('+'):
             ip_port += str(eval(splitted_expr))
-        selected_ips.append(ip_addr + ':' + ip_port)
+        ip_object['addr'] = ip_addr + ':' + ip_port
+        selected_ips.append(ip_object)
     return selected_ips
