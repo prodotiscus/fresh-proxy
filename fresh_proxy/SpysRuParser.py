@@ -5,7 +5,7 @@ import re
 
 # Spys.Ru Proxy List Parser
 
-def getAllProxies():
+def getAllProxies(addr_only = False):
     ps_prepare = requests.get('http://spys.ru/proxies').text
     xf_token = re.search(
         r"name='xf0'\svalue='[a-f\d]+", ps_prepare
@@ -57,5 +57,5 @@ def getAllProxies():
         for splitted_expr in fi_parts[1][:-1].split('+'):
             ip_port += str(eval(splitted_expr))
         ip_object['addr'] = ip_addr + ':' + ip_port
-        selected_ips.append(ip_object)
+        selected_ips.append(ip_object if not addr_only else ip_object['addr'])
     return selected_ips
