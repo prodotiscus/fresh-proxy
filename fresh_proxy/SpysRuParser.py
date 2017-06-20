@@ -2,16 +2,17 @@
 
 import requests
 import re
+import time
 
 # Spys.Ru Proxy List Parser
 
-def getAllProxies(addr_only = False):
-    ps_prepare = requests.get('http://spys.ru/proxies').text
+def getSectionProxies(url, addr_only = False):
+    ps_prepare = requests.get(url).text
     xf_token = re.search(
         r"name='xf0'\svalue='[a-f\d]+", ps_prepare
     ).group(0).split("'")[3]
     proxy_code = requests.post(
-        'http://spys.ru/proxies/',
+        url,
         {
             'xpp' : 4,
             'xf1' : 0,
@@ -43,7 +44,6 @@ def getAllProxies(addr_only = False):
             'document.write("<font class=spy2>:<\\/font>"+'
         )
         fi_location = found_locations[j]
-        print(fi_location)
         ip_object = {
             'addr' : '',
             'country' : '',
@@ -59,3 +59,19 @@ def getAllProxies(addr_only = False):
         ip_object['addr'] = ip_addr + ':' + ip_port
         selected_ips.append(ip_object if not addr_only else ip_object['addr'])
     return selected_ips
+def getAllProxies(countries = 20, addr_only = False, printing = False):
+    if printing:
+        print('Connecting to the recent proxies page...')
+    base = getSectionProxies('http://spys.ru/proxies/', addr_only)
+    if printing:
+        print('Getting the proxy countries list...')
+    pc_prepare = requests.get('http://spys.ru/proxys/').text
+    proxy_countries = re.findall(r'\/proxys\/\w{2,4}\/', pc_prepare)
+    if countries > len(proxy_countries):
+        countries = len(proxy_countries)
+    for i in range(countries):
+        if printing:
+            print('Connecting to ' + proxy_countries[i])
+        base += getSectionProxies('http://spys.ru' + proxy_countries[i], addr_only)
+        time.sleep(0.3)
+    return base
